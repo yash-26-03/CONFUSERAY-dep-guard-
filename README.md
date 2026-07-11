@@ -1,10 +1,11 @@
-# dep-guard (ConfuseRay)
+# ConfuseRay (dep-guard)
 
 A static scanner that detects **dependency confusion** vulnerabilities in your projects. It reads dependency manifests (`package.json`, `requirements.txt`, `pom.xml`), checks every declared package against public registries (npm, PyPI, Maven Central), and flags internal package names that also exist publicly — exactly the setup a dependency-confusion attack exploits.
 
 ## Why
 
 Dependency confusion attacks happen when an attacker publishes a malicious package on a public registry using the same name as your private/internal package. If your build system isn't locked down, it may pull the attacker's version instead of yours. dep-guard catches this before it hits production.
+
 
 ## Features
 
@@ -18,16 +19,18 @@ Dependency confusion attacks happen when an attacker publishes a malicious packa
 - **CI/CD ready** — exits with non-zero status when findings exceed your severity threshold
 - **Offline mode** — scan against a local registry cache when network access isn't available
 
+
 ## Installation
 
 ```bash
 # clone and install in editable mode
-git clone https://github.com/your-org/ConfuseRay.git
+git clone https://github.com/yash-26-03/ConfuseRay.git
 cd ConfuseRay
 pip install -e .
 ```
 
-**Requirements:** Python ≥ 3.8, `requests` ≥ 2.28.0. MongoDB support requires `pymongo` ≥ 4.0.
+**Requirements:** Python ≥ 3.8, `requests` ≥ 2.28.0.
+
 
 ## Quick Start
 
@@ -54,13 +57,13 @@ Edit the generated file:
 }
 ```
 
-| Field | Description |
-|---|---|
-| `internal_scopes` | npm scope prefixes (e.g. `@acme`) treated as internal |
-| `internal_packages` | Exact package names treated as internal |
-| `ecosystems` | Which registries to check (`npm`, `pypi`, `maven`) |
-| `fail_on` | Minimum severity to trigger a non-zero exit (`critical`, `high`, `medium`, `low`) |
-| `warn_unpinned` | Also report dependencies without pinned versions |
+| Field              | Description |
+|--------------------|-------------|
+ `internal_scopes` -> npm scope prefixes (e.g. `@acme`) treated as internal 
+ `internal_packages` -> Exact package names treated as internal 
+ `ecosystems` -> Which registries to check (`npm`, `pypi`, `maven`) 
+ `fail_on` -> Minimum severity to trigger a non-zero exit (`critical`, `high`, `medium`, `low`) 
+ `warn_unpinned` -> Also report dependencies without pinned versions 
 
 ### 2. Scan a project
 
@@ -78,6 +81,7 @@ depguard scan ./my-project \
   --report-sarif report.sarif
 ```
 
+
 ## CLI Reference
 
 ```
@@ -88,6 +92,7 @@ Commands:
   init        Print a starter config to stdout
   dashboard   Launch the scan-history web dashboard
 ```
+
 
 ### `depguard scan`
 
@@ -105,10 +110,9 @@ Options:
   --fail-on LEVEL       Override fail severity (critical|high|medium|low)
   --warn-unpinned       Also flag unpinned dependency versions
   --offline             Use local registry cache instead of live HTTP
-  --cache FILE          Path to registry cache JSON (implies --offline)
-  --mongo-uri URI       Save report to MongoDB (default: mongodb://localhost:27017/)
   -q, --quiet           Suppress progress output
 ```
+
 
 ### `depguard dashboard`
 
@@ -122,27 +126,30 @@ Options:
   --mongo-uri URI       Read reports from MongoDB
 ```
 
+
 ## Exit Codes
 
-| Code | Meaning |
-|---|---|
-| `0` | Clean — no findings above threshold |
-| `1` | Findings detected at or above the `fail_on` severity |
-| `2` | Error — bad config, missing files, network failure, etc. |
+| Code        | Meaning |
+|-------------|---------|
+ `0` -> Clean — no findings above threshold 
+ `1` -> Findings detected at or above the `fail_on` severity 
+ `2` -> Error — bad config, missing files, network failure, etc. 
+
 
 ## Risk Scoring
 
 Each finding is assigned a numeric risk score based on these factors:
 
-| Factor | Points |
-|---|---|
-| Package is in internal scope | +3 |
-| Public package exists on registry | +4 |
-| Public version is higher than declared | +5 |
-| No registry config protection | +2 |
-| Typosquatting detected | +4 |
+| Factor                       | Points |
+|------------------------------|--------|
+ Package is in internal scope ->   +3 
+ Public package exists on registry ->   +4 
+ Public version is higher than declared ->   +5 
+ No registry config protection ->   +2 
+ Typosquatting detected ->   +4 
 
 Scores map to severities: **critical** (≥12), **high** (≥8), **medium** (≥4), **low** (<4).
+
 
 ## CI/CD Integration
 
@@ -183,6 +190,7 @@ jobs:
             report.json
 ```
 
+
 ### Pre-commit Hook
 
 ```bash
@@ -192,40 +200,6 @@ chmod +x .git/hooks/pre-commit
 
 This runs `depguard scan` on every commit and blocks if high/critical findings are detected.
 
-## Project Structure
-
-```
-ConfuseRay/
-├── CONFUSERAY/                  # main package
-│   ├── __init__.py              # version, exit codes
-│   ├── __main__.py              # python -m entry point
-│   ├── cli.py                   # argument parsing & command dispatch
-│   ├── config.py                # config loading & internal-package matching
-│   ├── parsers.py               # package.json / requirements.txt / pom.xml parsers
-│   ├── registries.py            # npm / PyPI / Maven Central API client
-│   ├── scanner.py               # core scan logic & finding generation
-│   ├── scorer.py                # risk score computation
-│   ├── typosquat.py             # Levenshtein-based typosquatting detection
-│   ├── reporter.py              # console, JSON, and Markdown report output
-│   ├── sarif.py                 # SARIF 2.1 report generation
-│   └── dashboard/               # web dashboard
-│       ├── server.py            # stdlib HTTP server
-│       ├── db.py                # MongoDB read/write layer
-│       ├── dashboard.html       # single-file frontend (chart + table + detail panel)
-│       └── sample_reports/      # example JSON reports for testing
-├── Examples/                    # sample projects to scan
-│   ├── Backend-api/             # Python requirements.txt
-│   ├── web-frontend/            # npm package.json
-│   └── java-service/            # Maven pom.xml
-├── tests/                       # pytest test suite
-├── scripts/
-│   └── pre-commit-hook.sh       # git pre-commit hook
-├── .github/workflows/
-│   └── depguard.yml             # GitHub Actions CI workflow
-├── setup.py                     # packaging
-├── requirements.txt             # runtime dependencies
-└── depguard.config.json         # example config
-```
 
 ## Running Tests
 
@@ -234,6 +208,3 @@ pip install pytest
 pytest tests/ -v
 ```
 
-## License
-
-MIT
