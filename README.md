@@ -59,11 +59,11 @@ Edit the generated file:
 
 | Field              | Description |
 |--------------------|-------------|
- `internal_scopes` -> npm scope prefixes (e.g. `@acme`) treated as internal 
- `internal_packages` -> Exact package names treated as internal 
- `ecosystems` -> Which registries to check (`npm`, `pypi`, `maven`) 
- `fail_on` -> Minimum severity to trigger a non-zero exit (`critical`, `high`, `medium`, `low`) 
- `warn_unpinned` -> Also report dependencies without pinned versions 
+| `internal_scopes` | npm scope prefixes (e.g. `@acme`) treated as internal |
+| `internal_packages` | Exact package names treated as internal |
+| `ecosystems` | Which registries to check (`npm`, `pypi`, `maven`) |
+| `fail_on` | Minimum severity to trigger a non-zero exit (`critical`, `high`, `medium`, `low`) |
+| `warn_unpinned` | Also report dependencies without pinned versions |
 
 ### 2. Scan a project
 
@@ -131,9 +131,9 @@ Options:
 
 | Code        | Meaning |
 |-------------|---------|
- `0` -> Clean — no findings above threshold 
- `1` -> Findings detected at or above the `fail_on` severity 
- `2` -> Error — bad config, missing files, network failure, etc. 
+| `0` | Clean — no findings above threshold |
+| `1` | Findings detected at or above the `fail_on` severity |
+| `2` | Error — bad config, missing files, network failure, etc. |
 
 
 ## Risk Scoring
@@ -142,11 +142,11 @@ Each finding is assigned a numeric risk score based on these factors:
 
 | Factor                       | Points |
 |------------------------------|--------|
- Package is in internal scope ->   +3 
- Public package exists on registry ->   +4 
- Public version is higher than declared ->   +5 
- No registry config protection ->   +2 
- Typosquatting detected ->   +4 
+| Package is in internal scope |   +3 |
+| Public package exists on registry |   +4 |
+| Public version is higher than declared |   +5 |
+| No registry config protection |   +2 |
+| Typosquatting detected |   +4 |
 
 Scores map to severities: **critical** (≥12), **high** (≥8), **medium** (≥4), **low** (<4).
 
