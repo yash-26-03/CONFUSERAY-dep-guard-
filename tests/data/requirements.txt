@@ -1,0 +1,7 @@
+# sample requirements for tests
+requests==2.31.0
+flask>=2.3.0
+acme-payments-lib==2.0.0
+billing-core==0.1.0
+acme-auth==1.5.0
+-r other.txt

@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-07-08T16:44:02Z",
+  "summary": {"medium": 1},
+  "total_findings": 1,
+  "meta": {
+    "project": "/home/ci/acme-checkout",
+    "config": "depguard.config.json",
+    "scanned_files": 2,
+    "total_deps": 40,
+    "passed": true,
+    "fail_on": "high"
+  },
+  "findings": [
+    {
+      "package": "requests",
+      "ecosystem": "pypi",
+      "severity": "medium",
+      "title": "Unpinned dependency version",
+      "detail": "requests is declared as '>=2.28', which lets the resolver pick any matching public version.",
+      "recommendation": "Pin requests to an exact version.",
+      "version": ">=2.28",
+      "source": "requirements.txt",
+      "risk_score": null
+    }
+  ]
+}

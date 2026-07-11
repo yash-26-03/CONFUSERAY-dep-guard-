@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CONFUSERAY · SCAN HISTORY</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0b0f15;
+  --surface: #141a22;
+  --surface-hover: #1a2230;
+  --border: rgba(255,255,255,.06);
+  --text: #c8ccd5;
+  --text-bright: #e4e7ed;
+  --text-dim: #5c6370;
+  --accent: #60a5fa;
+  --green: #34d399;
+  --red: #f87171;
+  --crit: #ef4444;
+  --high: #f97316;
+  --med: #eab308;
+  --low: #06b6d4;
+  --radius: 10px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.55;
+  min-height: 100vh;
+}
+
+header {
+  padding: 1.5rem 2rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  gap: .75rem;
+}
+header h1 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  letter-spacing: -.02em;
+}
+header > span {
+  font-size: .85rem;
+  color: var(--text-dim);
+}
+
+main {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 1.75rem 2rem 3rem;
+}
+section { margin-bottom: 2rem; }
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .75rem;
+}
+.section-head h2 {
+  font-size: .95rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  text-transform: lowercase;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .85rem;
+  margin-bottom: 2rem;
+}
+.card {
+  background: white;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.15rem 1.25rem;
+  transition: transform .15s ease, border-color .15s ease;
+}
+.card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0,0,0,.1);
+}
+.card .label {
+  font-size: .75rem;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: .3rem;
+}
+.card .value {
+  font-size: 1.65rem;
+  font-weight: 600;
+  color: #111;
+  line-height: 1.2;
+}
+.card .sub {
+  font-size: .75rem;
+  color: #666;
+  margin-top: .25rem;
+}
+
+.chart-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 4rem;
+}
+.chart-wrap canvas {
+  width: 100%;
+  height: 220px;
+  display: block;
+}
+.legend {
+  display: flex;
+  gap: 1rem;
+  font-size: .75rem;
+}
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  color: var(--text-dim);
+}
+.legend .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .85rem;
+}
+.history-table thead th {
+  text-align: left;
+  padding: .6rem .75rem;
+  font-weight: 500;
+  color: mediumpurple;
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  border-bottom: 1px solid var(--border);
+}
+.history-table tbody tr {
+  cursor: pointer;
+  transition: background .12s ease;
+}
+.history-table tbody tr:hover {
+  background: var(--surface-hover);
+}
+.history-table td {
+  padding: .65rem .75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.badge {
+  display: inline-block;
+  padding: .15rem .5rem;
+  border-radius: 4px;
+  font-size: .72rem;
+  font-weight: 500;
+}
+.badge-pass { background: lightgrey; color: darkgreen; }
+.badge-fail { background: lightgrey; color: darkred; }
+.sev-pills { display: flex; gap: .3rem; flex-wrap: wrap; }
+.sev-pill {
+  font-size: .7rem;
+  padding: .1rem .4rem;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.sev-critical { background: lightgrey; color: darkred; }
+.sev-high { background: lightgrey; color: saddlebrown; }
+.sev-medium { background: lightgrey; color: darkgoldenrod; }
+.sev-low { background: lightgrey; color: teal; }
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease;
+  z-index: 100;
+}
+.overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.detail-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(520px, 90vw);
+  height: 100vh;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  transform: translateX(100%);
+  transition: transform .25s ease;
+  overflow-y: auto;
+  z-index: 101;
+}
+.overlay.open .detail-panel {
+  transform: translateX(0);
+}
+.detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+}
+.detail-head h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+.close-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color .15s;
+}
+.close-btn:hover { border-color: var(--text); color: var(--text); }
+.detail-body { padding: 1.25rem 1.5rem; }
+
+.finding-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.15rem;
+  margin-bottom: .75rem;
+}
+.finding-card .f-head {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .4rem;
+}
+.finding-card .f-pkg  { font-weight: 600; color: var(--text-bright); font-size: .9rem; }
+.finding-card .f-eco  { font-size: .7rem; color: var(--text-dim); background: rgba(255,255,255,.05); padding: .1rem .4rem; border-radius: 3px; }
+.finding-card .f-title  { font-size: .82rem; margin-bottom: .3rem; }
+.finding-card .f-detail { font-size: .78rem; color: var(--text-dim); margin-bottom: .4rem; }
+.finding-card .f-fix    { font-size: .78rem; color: var(--accent); }
+.finding-card .f-score  { font-size: .72rem; color: var(--text-dim); margin-top: .25rem; }
+
+.empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-dim);
+}
+.empty p { margin-top: .5rem; font-size: .85rem; }
+
+.loading {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--text-dim);
+  font-size: .9rem;
+}
+
+@media (max-width: 800px) {
+  .cards { grid-template-columns: repeat(2, 1fr); }
+  main { padding: 1.25rem 1rem; }
+}
+@media (max-width: 480px) {
+  .cards { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header style="padding: 0; display: flex; align-items: stretch; border-bottom: 1px solid var(--border);">
+  <div style="background: rgba(37, 180, 128, 0.08); padding: 1.5rem 0 1.25rem 2rem; display: flex; align-items: baseline;">
+    <h1 style="font-size: 2.5rem; letter-spacing: -.02em;"><span style="color: var(--red);">CONFUSE</span></h1>
+  </div>
+  <div style="background: rgba(221, 94, 94, 0.08); padding: 1.5rem 2rem 1.25rem 0; flex-grow: 1; display: flex; align-items: baseline;">
+    <h1 style="font-size: 2.5rem; letter-spacing: -.02em;"><span style="color: var(--green);">RAY</span></h1>
+    
+  </div>
+</header>
+
+<main id="app">
+  <div class="loading" id="loading">loading reports&hellip;</div>
+</main>
+
+<div class="overlay" id="overlay" onclick="closeDetail(event)">
+  <div class="detail-panel" onclick="event.stopPropagation()">
+    <div class="detail-head">
+      <h2 id="detail-title">scan details</h2>
+      <button class="close-btn" onclick="closeDetail()" title="close">&times;</button>
+    </div>
+    <div class="detail-body" id="detail-body"></div>
+  </div>
+</div>
+
+<script>
+let reports = [];
+let fullCache = {};
+
+const SEV_ORDER  = { critical: 4, high: 3, medium: 2, low: 1, info: 0 };
+const SEV_COLORS = { critical: '#ef4444', high: '#f97316', medium: '#eab308', low: '#06b6d4' };
+
+async function init() {
+  try {
+    const resp = await fetch('/api/reports');
+    reports = await resp.json();
+  } catch (e) {
+    document.getElementById('app').innerHTML =
+      '<div class="empty"><h2>could not load reports</h2>' +
+      '<p>make sure the server is running and reports exist in the directory.</p></div>';
+    return;
+  }
+
+  if (!reports.length) {
+    document.getElementById('app').innerHTML =
+      '<div class="empty"><h2>no reports found</h2>' +
+      '<p>run <code>depguard scan ... --report-json reports/scan.json</code> first.</p></div>';
+    return;
+  }
+
+  reports.sort((a, b) => a.generated_at.localeCompare(b.generated_at));
+  render();
+}
+
+function render() {
+  const app = document.getElementById('app');
+  const totalScans = reports.length;
+  const totalFindings = reports.reduce((s, r) => s + (r.total_findings || 0), 0);
+  const passCount = reports.filter(r => r.meta && r.meta.passed).length;
+  const passRate = totalScans ? Math.round((passCount / totalScans) * 100) : 0;
+  const uniqueProjects = new Set(reports.map(r => (r.meta && r.meta.project) || '?')).size;
+
+  let html = '';
+
+  // stat cards
+  html += '<section class="cards">';
+  html += card('scans', totalScans, `across ${uniqueProjects} project${uniqueProjects !== 1 ? 's' : ''}`);
+  html += card('findings', totalFindings, 'total across all scans');
+  html += card('pass rate', passRate + '%', `${passCount} of ${totalScans} passed`);
+
+  const latest = reports[reports.length - 1];
+  const latestBits = Object.entries(latest.summary || {})
+    .sort((a, b) => (SEV_ORDER[b[0]] || 0) - (SEV_ORDER[a[0]] || 0))
+    .map(([s, n]) => `${n} ${s}`)
+    .join(', ') || 'clean';
+  html += card('latest scan', latest.total_findings, latestBits);
+  html += '</section>';
+
+  // trend chart
+  html += '<section class="chart-wrap">';
+  html += '<div class="section-head"><h2>findings over time</h2>';
+  html += '<div class="legend">';
+  for (const [sev, col] of Object.entries(SEV_COLORS)) {
+    html += `<span><span class="dot" style="background:${col}"></span>${sev}</span>`;
+  }
+  html += '</div></div>';
+  html += '<canvas id="chart"></canvas>';
+  html += '</section>';
+
+  // history table
+  html += '<section>';
+  html += '<div class="section-head" style="justify-content: center;"><h2 style="color: lightpink; font-size: 1.5rem;">scan history</h2></div>';
+  html += '<table class="history-table"><thead><tr>';
+  html += '<th>date</th><th>project</th><th>severities</th><th>findings</th><th>status</th>';
+  html += '</tr></thead><tbody>';
+
+  for (const r of [...reports].reverse()) {
+    const date = formatDate(r.generated_at);
+    const proj = shortProject(r.meta && r.meta.project);
+    const sum = r.summary || {};
+    const passed = r.meta && r.meta.passed;
+
+    let pills = '';
+    for (const sev of ['critical', 'high', 'medium', 'low']) {
+      if (sum[sev]) pills += `<span class="sev-pill sev-${sev}">${sum[sev]} ${sev}</span>`;
+    }
+    if (!pills) pills = '<span style="color:var(--text-dim)">—</span>';
+
+    const badge = passed
+      ? '<span class="badge badge-pass">pass</span>'
+      : '<span class="badge badge-fail">fail</span>';
+
+    html += `<tr onclick="openDetail('${r.file}')">`;
+    html += `<td>${date}</td><td>${proj}</td>`;
+    html += `<td><div class="sev-pills">${pills}</div></td>`;
+    html += `<td>${r.total_findings}</td><td>${badge}</td>`;
+    html += '</tr>';
+  }
+  html += '</tbody></table></section>';
+
+  app.innerHTML = html;
+  requestAnimationFrame(() => {
+    const canvas = document.getElementById('chart');
+    if (canvas) drawChart(canvas);
+  });
+}
+
+function card(label, value, sub) {
+  return `<div class="card">
+    <div class="label">${label}</div>
+    <div class="value">${value}</div>
+    <div class="sub">${sub || ''}</div>
+  </div>`;
+}
+
+function drawChart(canvas) {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const w = rect.width, h = rect.height;
+  const m = { t: 14, r: 12, b: 32, l: 36 };
+  const pw = w - m.l - m.r;
+  const ph = h - m.t - m.b;
+
+  // compute Y-axis ceiling
+  let maxY = 0;
+  for (const r of reports) {
+    for (const sev of Object.keys(SEV_COLORS)) {
+      maxY = Math.max(maxY, (r.summary && r.summary[sev]) || 0);
+    }
+  }
+  maxY = Math.ceil(Math.max(maxY, 1) * 1.15);
+
+  // grid
+  ctx.strokeStyle = 'rgba(255,255,255,.04)';
+  ctx.lineWidth = 1;
+  ctx.font = '11px Inter, system-ui';
+  ctx.fillStyle = '#5c6370';
+  ctx.textAlign = 'right';
+  const gridN = 4;
+
+  for (let i = 0; i <= gridN; i++) {
+    const y = m.t + (ph * i / gridN);
+    ctx.beginPath();
+    ctx.moveTo(m.l, y);
+    ctx.lineTo(w - m.r, y);
+    ctx.stroke();
+    ctx.fillText(Math.round(maxY * (1 - i / gridN)), m.l - 8, y + 4);
+  }
+
+  const n = reports.length;
+  const xPos = i => m.l + (pw * i / Math.max(n - 1, 1));
+  const yPos = v => m.t + ph * (1 - v / maxY);
+
+  // severity lines
+  for (const [sev, color] of Object.entries(SEV_COLORS)) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+
+    let hasData = false;
+    reports.forEach((r, i) => {
+      const v = (r.summary && r.summary[sev]) || 0;
+      if (v > 0) hasData = true;
+      i === 0 ? ctx.moveTo(xPos(i), yPos(v)) : ctx.lineTo(xPos(i), yPos(v));
+    });
+    if (!hasData) continue;
+    ctx.stroke();
+
+    ctx.fillStyle = color;
+    reports.forEach((r, i) => {
+      const v = (r.summary && r.summary[sev]) || 0;
+      if (v === 0) return;
+      ctx.beginPath();
+      ctx.arc(xPos(i), yPos(v), 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  // x-axis labels
+  ctx.fillStyle = '#5c6370';
+  ctx.textAlign = 'center';
+  ctx.font = '10px Inter, system-ui';
+  reports.forEach((r, i) => {
+    ctx.fillText(r.generated_at ? r.generated_at.slice(5, 10) : '?', xPos(i), h - 8);
+  });
+}
+
+async function openDetail(filename) {
+  const overlay = document.getElementById('overlay');
+  const body = document.getElementById('detail-body');
+  const title = document.getElementById('detail-title');
+
+  if (!fullCache[filename]) {
+    body.innerHTML = '<div class="loading">loading&hellip;</div>';
+    overlay.classList.add('open');
+    try {
+      const resp = await fetch('/api/report/' + filename);
+      fullCache[filename] = await resp.json();
+    } catch (e) {
+      body.innerHTML = '<p style="color:var(--red)">failed to load report</p>';
+      return;
+    }
+  } else {
+    overlay.classList.add('open');
+  }
+
+  const report = fullCache[filename];
+  title.textContent = `${shortProject(report.meta && report.meta.project)} · ${formatDate(report.generated_at)}`;
+
+  let html = '<div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;font-size:.78rem;color:var(--text-dim)">';
+  if (report.meta) {
+    if (report.meta.scanned_files != null) html += `<span>${report.meta.scanned_files} files</span>`;
+    if (report.meta.total_deps != null) html += `<span>${report.meta.total_deps} deps</span>`;
+    html += `<span>threshold: ${report.meta.fail_on || '?'}</span>`;
+    html += report.meta.passed
+      ? '<span class="badge badge-pass">passed</span>'
+      : '<span class="badge badge-fail">failed</span>';
+  }
+  html += '</div>';
+
+  const findings = report.findings || [];
+  if (!findings.length) {
+    html += '<p style="color:var(--green);font-size:.85rem">no findings — clean scan</p>';
+  }
+
+  for (const f of findings) {
+    html += '<div class="finding-card">';
+    html += `<div class="f-head">
+      <span class="sev-pill sev-${f.severity}">${f.severity}</span>
+      <span class="f-pkg">${esc(f.package)}</span>
+      <span class="f-eco">${esc(f.ecosystem)}</span>
+    </div>`;
+    html += `<div class="f-title">${esc(f.title)}</div>`;
+    html += `<div class="f-detail">${esc(f.detail)}</div>`;
+    html += `<div class="f-fix">fix: ${esc(f.recommendation)}</div>`;
+    if (f.risk_score != null) {
+      html += `<div class="f-score">risk score: ${f.risk_score} · source: ${esc(f.source || '?')}</div>`;
+    }
+    html += '</div>';
+  }
+
+  body.innerHTML = html;
+}
+
+function closeDetail(e) {
+  if (e && e.target !== document.getElementById('overlay')) return;
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  } catch (_) { return iso.slice(0, 10); }
+}
+
+function shortProject(path) {
+  if (!path) return '?';
+  const parts = path.replace(/\\/g, '/').split('/').filter(Boolean);
+  return parts[parts.length - 1] || path;
+}
+
+function esc(s) {
+  if (!s) return '';
+  const el = document.createElement('span');
+  el.textContent = s;
+  return el.innerHTML;
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const c = document.getElementById('chart');
+    if (c) drawChart(c);
+  }, 150);
+});
+
+init();
+</script>
+</body>
+</html>

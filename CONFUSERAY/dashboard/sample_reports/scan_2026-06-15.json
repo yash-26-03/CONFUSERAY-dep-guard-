@@ -1,0 +1,70 @@
+{
+  "generated_at": "2026-06-15T09:32:14Z",
+  "summary": {"critical": 1, "high": 2, "medium": 2},
+  "total_findings": 5,
+  "meta": {
+    "project": "/home/ci/acme-platform",
+    "config": "depguard.config.json",
+    "scanned_files": 3,
+    "total_deps": 87,
+    "passed": false,
+    "fail_on": "high"
+  },
+  "findings": [
+    {
+      "package": "acme-auth",
+      "ecosystem": "npm",
+      "severity": "critical",
+      "title": "Dependency confusion: internal package found on PUBLIC registry (higher version present)",
+      "detail": "acme-auth is listed as internal, but a public npm package exists (latest=3.1.0, 12 versions). Risk score: 14",
+      "recommendation": "Pin acme-auth to the exact internal version in package.json and force the scope to your private registry via .npmrc.",
+      "version": "^1.2.0",
+      "source": "package.json",
+      "risk_score": 14
+    },
+    {
+      "package": "billing-core",
+      "ecosystem": "pypi",
+      "severity": "high",
+      "title": "Dependency confusion: internal package found on PUBLIC registry",
+      "detail": "billing-core is listed as internal, but a public pypi package exists (latest=0.9.1, 3 versions). Risk score: 9",
+      "recommendation": "Pin billing-core to the internal build and restrict it to the private index using --index-url.",
+      "version": "==2.1.0",
+      "source": "requirements.txt",
+      "risk_score": 9
+    },
+    {
+      "package": "acme-shared-utlis",
+      "ecosystem": "npm",
+      "severity": "high",
+      "title": "Possible typosquatting of internal package",
+      "detail": "acme-shared-utlis looks suspiciously similar to internal package 'acme-shared-utils'.",
+      "recommendation": "Verify that 'acme-shared-utlis' is the correct package and not a typosquat of 'acme-shared-utils'.",
+      "version": "^1.0.0",
+      "source": "package.json",
+      "risk_score": null
+    },
+    {
+      "package": "acme-auth",
+      "ecosystem": "npm",
+      "severity": "medium",
+      "title": "No registry scope configuration found",
+      "detail": "No npm registry config (.npmrc) detected in project root to protect internal packages.",
+      "recommendation": "Add a registry config file to scope 'acme-auth' to your private registry.",
+      "version": "^1.2.0",
+      "source": "package.json",
+      "risk_score": null
+    },
+    {
+      "package": "billing-core",
+      "ecosystem": "pypi",
+      "severity": "medium",
+      "title": "No registry scope configuration found",
+      "detail": "No pypi registry config (pip.conf) detected in project root.",
+      "recommendation": "Add pip.conf to scope billing-core to your private index.",
+      "version": "==2.1.0",
+      "source": "requirements.txt",
+      "risk_score": null
+    }
+  ]
+}

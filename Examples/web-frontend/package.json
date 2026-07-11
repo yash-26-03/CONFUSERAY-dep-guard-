@@ -1,0 +1,17 @@
+{
+  "name": "acme-web-frontend",
+  "version": "3.2.0",
+  "private": true,
+  "description": "internal web app",
+  "dependencies": {
+    "react": "^18.2.0",
+    "lodash": "4.17.21",
+    "@acme/payments": "^2.0.0",
+    "@acme/auth": "^1.4.0",
+    "@acme-corp/logger": "^0.0.2"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "@acme/shared-utils": "1.0.0"
+  }
+}

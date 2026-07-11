@@ -1,0 +1,59 @@
+{
+  "generated_at": "2026-07-01T11:08:47Z",
+  "summary": {"critical": 1, "high": 1, "medium": 2},
+  "total_findings": 4,
+  "meta": {
+    "project": "/home/ci/acme-checkout",
+    "config": "depguard.config.json",
+    "scanned_files": 2,
+    "total_deps": 42,
+    "passed": false,
+    "fail_on": "high"
+  },
+  "findings": [
+    {
+      "package": "acme-payments-lib",
+      "ecosystem": "npm",
+      "severity": "critical",
+      "title": "Dependency confusion: internal package found on PUBLIC registry (higher version present)",
+      "detail": "acme-payments-lib is listed as internal, but a public npm package exists (latest=5.0.0, 8 versions). Risk score: 14",
+      "recommendation": "Pin acme-payments-lib to the exact internal version and scope to your private registry via .npmrc.",
+      "version": "^2.3.0",
+      "source": "package.json",
+      "risk_score": 14
+    },
+    {
+      "package": "acme-shared-utils",
+      "ecosystem": "pypi",
+      "severity": "high",
+      "title": "Dependency confusion: internal package found on PUBLIC registry",
+      "detail": "acme-shared-utils is listed as internal, but a public pypi package exists (latest=1.0.0, 2 versions). Risk score: 9",
+      "recommendation": "Pin acme-shared-utils to the internal build and restrict it to the private index.",
+      "version": ">=1.0",
+      "source": "requirements.txt",
+      "risk_score": 9
+    },
+    {
+      "package": "acme-payments-lib",
+      "ecosystem": "npm",
+      "severity": "medium",
+      "title": "No registry scope configuration found",
+      "detail": "No npm registry config (.npmrc) detected in project root.",
+      "recommendation": "Add .npmrc to scope private packages to your internal registry.",
+      "version": "^2.3.0",
+      "source": "package.json",
+      "risk_score": null
+    },
+    {
+      "package": "requests",
+      "ecosystem": "pypi",
+      "severity": "medium",
+      "title": "Unpinned dependency version",
+      "detail": "requests is declared as '>=2.28', which lets the resolver pick any matching public version.",
+      "recommendation": "Pin requests to an exact version.",
+      "version": ">=2.28",
+      "source": "requirements.txt",
+      "risk_score": null
+    }
+  ]
+}
