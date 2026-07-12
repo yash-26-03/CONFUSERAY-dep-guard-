@@ -1,11 +1,11 @@
 {
   "_comment": "List your own internal/private packages here. dep-guard treats every name in `internal_packages` and every `internal_scopes` prefix as 'must NOT be public'. If any of them show up on the public registry, that's flagged as a dependency-confusion risk.",
-  "internal_scopes": ["@acme", "@acme-corp"],
+  "internal_scopes": ["@confuseray-internal", "@confuseray-corp"],
   "internal_packages": [
-    "acme-auth",
-    "acme-payments-lib",
-    "billing-core",
-    "acme-shared-utils"
+    "confuseray-demo-auth",
+    "confuseray-demo-payments",
+    "confuseray-demo-billing",
+    "confuseray-demo-utils"
   ],
   "ecosystems": ["npm", "pypi", "maven"],
   "fail_on": "high",
