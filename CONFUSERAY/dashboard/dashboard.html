@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CONFUSERAY · SCAN HISTORY</title>
+<title>CONFUSERAY - SCAN HISTORY</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg: #0b0f15;
+  --bg: #000000;
   --surface: #141a22;
   --surface-hover: #1a2230;
   --border: rgba(255,255,255,.06);
@@ -152,7 +152,7 @@ section { margin-bottom: 2rem; }
   font-size: .75rem;
   text-transform: uppercase;
   letter-spacing: .03em;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 .history-table tbody tr {
   cursor: pointer;
@@ -163,13 +163,16 @@ section { margin-bottom: 2rem; }
 }
 .history-table td {
   padding: .65rem .75rem;
-  border-bottom: 1px solid var(--border);
-  color: var(--text);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
 }
 .badge {
-  display: inline-block;
-  padding: .15rem .5rem;
-  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
   font-size: .72rem;
   font-weight: 500;
 }
@@ -178,9 +181,13 @@ section { margin-bottom: 2rem; }
 .sev-pills { display: flex; gap: .3rem; flex-wrap: wrap; }
 .sev-pill {
   font-size: .7rem;
-  padding: .1rem .4rem;
+  padding: .15rem 0;
   border-radius: 3px;
   font-weight: 500;
+  width: 75px;
+  text-align: center;
+  display: inline-block;
+  box-sizing: border-box;
 }
 .sev-critical { background: lightgrey; color: darkred; }
 .sev-high { background: lightgrey; color: saddlebrown; }
@@ -294,12 +301,11 @@ section { margin-bottom: 2rem; }
 <body>
 
 <header style="padding: 0; display: flex; align-items: stretch; border-bottom: 1px solid var(--border);">
-  <div style="background: rgba(37, 180, 128, 0.08); padding: 1.5rem 0 1.25rem 2rem; display: flex; align-items: baseline;">
+  <div style="background: rgba(37, 180, 128, 0.40); padding: 1.5rem 0 1.25rem 2rem; display: flex; align-items: baseline;">
     <h1 style="font-size: 2.5rem; letter-spacing: -.02em;"><span style="color: var(--red);">CONFUSE</span></h1>
   </div>
-  <div style="background: rgba(221, 94, 94, 0.08); padding: 1.5rem 2rem 1.25rem 0; flex-grow: 1; display: flex; align-items: baseline;">
+  <div style="background: rgba(221, 94, 94, 0.40); padding: 1.5rem 2rem 1.25rem 0; flex-grow: 1; display: flex; align-items: baseline;">
     <h1 style="font-size: 2.5rem; letter-spacing: -.02em;"><span style="color: var(--green);">RAY</span></h1>
-    
   </div>
 </header>
 
@@ -372,13 +378,13 @@ function render() {
 
   // trend chart
   html += '<section class="chart-wrap">';
-  html += '<div class="section-head"><h2>findings over time</h2>';
+  html += '<div class="section-head"><h2 style="color: white;">findings over time</h2>';
   html += '<div class="legend">';
   for (const [sev, col] of Object.entries(SEV_COLORS)) {
-    html += `<span><span class="dot" style="background:${col}"></span>${sev}</span>`;
+    html += `<span style="color: white;"><span class="dot" style="background:${col}"></span>${sev}</span>`;
   }
   html += '</div></div>';
-  html += '<canvas id="chart"></canvas>';
+  html += '<canvas id="chart" style="margin-top: 2rem;"></canvas>';
   html += '</section>';
 
   // history table
@@ -453,7 +459,7 @@ function drawChart(canvas) {
   ctx.strokeStyle = 'rgba(255,255,255,.04)';
   ctx.lineWidth = 1;
   ctx.font = '11px Inter, system-ui';
-  ctx.fillStyle = '#5c6370';
+  ctx.fillStyle = 'white';
   ctx.textAlign = 'right';
   const gridN = 4;
 
@@ -497,7 +503,7 @@ function drawChart(canvas) {
   }
 
   // x-axis labels
-  ctx.fillStyle = '#5c6370';
+  ctx.fillStyle = 'white';
   ctx.textAlign = 'center';
   ctx.font = '10px Inter, system-ui';
   reports.forEach((r, i) => {

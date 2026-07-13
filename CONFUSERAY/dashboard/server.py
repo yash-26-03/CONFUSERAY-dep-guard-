@@ -1,8 +1,3 @@
-"""Tiny HTTP server for the scan-history dashboard.
-
-No deps beyond stdlib (pymongo only needed when --mongo-uri is used).
-Run via: depguard dashboard --reports-dir ./reports
-"""
 import http.server
 import json
 import os
@@ -11,7 +6,6 @@ import webbrowser
 
 
 def scan_reports_dir(reports_dir):
-    """Build a quick index of every JSON report in the directory."""
     out = []
     for path in sorted(glob.glob(os.path.join(reports_dir, "*.json"))):
         try:
@@ -30,11 +24,6 @@ def scan_reports_dir(reports_dir):
 
 
 class _Handler(http.server.BaseHTTPRequestHandler):
-    """
-    /              -> dashboard html
-    /api/reports   -> index of all reports
-    /api/report/X  -> single report json
-    """
 
     def do_GET(self):
         if self.path in ("/", "/index.html"):
@@ -57,6 +46,7 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         else:
             idx = scan_reports_dir(self.server.reports_dir)
         self._send_json(idx)
+
 
     def _serve_report(self):
         report_id = os.path.basename(self.path)
@@ -82,6 +72,7 @@ class _Handler(http.server.BaseHTTPRequestHandler):
             return
         self._send_file(fpath, "application/json")
 
+
     def _send_json(self, obj):
         body = json.dumps(obj).encode()
         self.send_response(200)
@@ -89,6 +80,7 @@ class _Handler(http.server.BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
 
     def _send_file(self, path, content_type):
         try:
@@ -108,7 +100,6 @@ class _Handler(http.server.BaseHTTPRequestHandler):
 
 
 def serve(reports_dir=None, port=8085, open_browser=True, mongo_uri=None):
-    """Fire up the dashboard. Blocks until Ctrl+C."""
     db = None
     if mongo_uri:
         from .db import get_db
